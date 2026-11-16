@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Evano Sleepy — Admin</title>
+<link rel="stylesheet" href="/css/dashboard.css">
+</head>
+<body>
+<header class="topbar admin-topbar">
+  <div class="brand"><span class="brand-dot">✦</span> Evano Sleepy <span class="admin-tag">Admin</span></div>
+  <div class="topbar-actions">
+    <div class="lang-switch">
+      <button type="button" class="lang-btn active" data-lang="en">EN</button>
+      <button type="button" class="lang-btn" data-lang="ar">ع</button>
+    </div>
+    <button type="button" id="logoutBtn" class="ghost-btn" data-i18n="nav.logout">Logout</button>
+  </div>
+</header>
+
+<main class="admin-page">
+  <section class="admin-hero">
+    <p class="admin-greet" data-i18n="admin.greeting">Administrator overview</p>
+    <h1 class="admin-title" data-i18n="admin.title">Evano's day</h1>
+    <p class="admin-sub" data-i18n="admin.sub">Read-only live view of Marina's entries.</p>
+  </section>
+
+  <section class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-label" data-i18n="stat.sleep">Sleep today</div>
+      <div class="stat-value" id="adminSleep">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label" data-i18n="stat.feeds">Feeds today</div>
+      <div class="stat-value" id="adminFeeds">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label" data-i18n="stat.diapers">Diapers today</div>
+      <div class="stat-value" id="adminDiapers">—</div>
+    </div>
+  </section>
+
+  <section class="med-monitor">
+    <h2 class="section-title" data-i18n="admin.medTitle">Medication monitoring</h2>
+    <div class="med-monitor-grid">
+      <article class="monitor-card" data-med-monitor="iron">
+        <div class="monitor-head">
+          <h3 data-i18n="med.iron">Iron</h3>
+          <span class="monitor-status" id="ironStatus">—</span>
+        </div>
+        <p class="monitor-line"><span data-i18n="admin.lastDate">Last date:</span> <strong id="ironDate">—</strong></p>
+        <p class="monitor-line"><span data-i18n="admin.lastTime">Last time:</span> <strong id="ironTime">—</strong></p>
+        <button type="button" class="btn-reset" data-reset="iron" data-i18n="admin.resetToday">Reset today</button>
+      </article>
+      <article class="monitor-card" data-med-monitor="calcium">
+        <div class="monitor-head">
+          <h3 data-i18n="med.calcium">Calcium</h3>
+          <span class="monitor-status" id="calciumStatus">—</span>
+        </div>
+        <p class="monitor-line"><span data-i18n="admin.lastDate">Last date:</span> <strong id="calciumDate">—</strong></p>
+        <p class="monitor-line"><span data-i18n="admin.lastTime">Last time:</span> <strong id="calciumTime">—</strong></p>
+        <button type="button" class="btn-reset" data-reset="calcium" data-i18n="admin.resetToday">Reset today</button>
+      </article>
+    </div>
+  </section>
+
+  <section class="history">
+    <h2 class="section-title" data-i18n="admin.historyTitle">Medication history</h2>
+    <div class="table-wrap">
+      <table class="history-table">
+        <thead>
+          <tr>
+            <th data-i18n="table.med">Medication</th>
+            <th data-i18n="table.status">Status</th>
+            <th data-i18n="table.date">Date</th>
+            <th data-i18n="table.time">Time</th>
+          </tr>
+        </thead>
+        <tbody id="historyBody"></tbody>
+      </table>
+      <p class="empty-state" id="historyEmpty" data-i18n="admin.empty">No records yet.</p>
+    </div>
+  </section>
+</main>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<dialog id="resetDialog" class="dialog">
+  <p id="resetText"></p>
+  <div class="dialog-actions">
+    <button type="button" class="ghost-btn" id="resetCancel" data-i18n="dialog.cancel">Cancel</button>
+    <button type="button" class="btn-reset" id="resetOk" data-i18n="dialog.confirm">Confirm</button>
+  </div>
+</dialog>
+
+<script src="/js/dashboard.js"></script>
+</body>
+</html>
