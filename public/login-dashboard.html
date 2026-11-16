@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Evano Sleepy — Admin Login</title>
+<link rel="stylesheet" href="/css/login-dashboard.css">
+</head>
+<body>
+<div class="admin-login-shell">
+  <div class="admin-brand">
+    <div class="admin-mark">✦</div>
+    <h1>Evano Sleepy</h1>
+    <p data-i18n="adminLogin.tagline">Administrator access</p>
+  </div>
+  <form id="adminLoginForm" class="admin-login-card" novalidate>
+    <div class="lang-switch">
+      <button type="button" class="lang-btn active" data-lang="en">EN</button>
+      <button type="button" class="lang-btn" data-lang="ar">ع</button>
+    </div>
+    <h2 data-i18n="adminLogin.title">Admin sign in</h2>
+    <label>
+      <span data-i18n="adminLogin.username">Username</span>
+      <input type="text" id="adminUsername" autocomplete="username" required>
+    </label>
+    <label>
+      <span data-i18n="adminLogin.password">Password</span>
+      <input type="password" id="adminPassword" autocomplete="current-password" required>
+    </label>
+    <button type="submit" class="btn-dark" data-i18n="adminLogin.submit">Sign in</button>
+    <div id="adminLoginError" class="error-msg" role="alert"></div>
+    <p class="admin-foot">
+      <a href="/login" data-i18n="adminLogin.babyLink">Baby login</a>
+    </p>
+  </form>
+</div>
+<script src="/js/login-dashboard.js"></script>
+</body>
+</html>
