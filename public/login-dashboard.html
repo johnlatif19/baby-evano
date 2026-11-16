@@ -25,7 +25,12 @@
     </label>
     <label>
       <span data-i18n="adminLogin.password">Password</span>
-      <input type="password" id="adminPassword" autocomplete="current-password" required>
+      <div class="password-wrap">
+        <input type="password" id="adminPassword" autocomplete="current-password" required>
+        <button type="button" class="toggle-password" data-target="adminPassword" aria-label="Show password">
+          <span class="eye-icon">👁</span>
+        </button>
+      </div>
     </label>
     <button type="submit" class="btn-dark" data-i18n="adminLogin.submit">Sign in</button>
     <div id="adminLoginError" class="error-msg" role="alert"></div>
