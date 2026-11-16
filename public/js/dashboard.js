@@ -122,13 +122,17 @@
 
   function fmtDate(iso) {
     if (!iso) return '—';
-    try { return new Date(iso).toLocaleDateString(lang === 'ar' ? 'ar-EG' : 'en-GB'); }
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) return '—';
+    try { return d.toLocaleDateString(lang === 'ar' ? 'ar-EG' : 'en-GB'); }
     catch { return '—'; }
   }
 
   function fmtTime(iso) {
     if (!iso) return '—';
-    try { return new Date(iso).toLocaleTimeString(lang === 'ar' ? 'ar-EG' : 'en-GB', { hour: '2-digit', minute: '2-digit' }); }
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) return '—';
+    try { return d.toLocaleTimeString(lang === 'ar' ? 'ar-EG' : 'en-GB', { hour: '2-digit', minute: '2-digit' }); }
     catch { return '—'; }
   }
 
