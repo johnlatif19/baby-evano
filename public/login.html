@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Evano Sleepy — Login</title>
+<link rel="stylesheet" href="/css/login.css">
+</head>
+<body>
+<div class="login-shell">
+  <div class="login-brand">
+    <div class="brand-mark">☾</div>
+    <h1>Evano Sleepy</h1>
+    <p data-i18n="login.tagline">Gentle care, softly tracked.</p>
+  </div>
+  <form id="loginForm" class="login-card" novalidate>
+    <div class="lang-switch">
+      <button type="button" class="lang-btn active" data-lang="en">EN</button>
+      <button type="button" class="lang-btn" data-lang="ar">ع</button>
+    </div>
+    <h2 data-i18n="login.welcome">Welcome back, Marina</h2>
+    <label>
+      <span data-i18n="login.username">Username</span>
+      <input type="text" id="username" autocomplete="username" required>
+    </label>
+    <label>
+      <span data-i18n="login.password">Password</span>
+      <input type="password" id="password" autocomplete="current-password" required>
+    </label>
+    <button type="submit" class="btn-primary" data-i18n="login.submit">Sign in</button>
+    <div id="loginError" class="error-msg" role="alert"></div>
+    <p class="login-foot">
+      <a href="/login-dashboard.html" data-i18n="login.adminLink">Admin access</a>
+    </p>
+  </form>
+</div>
+<script src="/js/login.js"></script>
+</body>
+</html>
