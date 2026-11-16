@@ -115,8 +115,8 @@
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' }
     }, options || {}));
-    if (res.status === 401) { window.location.href = '/login-dashboard.html'; throw new Error('auth'); }
-    if (res.status === 403) { window.location.href = '/login-dashboard.html'; throw new Error('role'); }
+    if (res.status === 401) { window.location.href = '/login-dashboard'; throw new Error('auth'); }
+    if (res.status === 403) { window.location.href = '/login-dashboard'; throw new Error('role'); }
     return res;
   }
 
@@ -207,13 +207,13 @@
 
   document.getElementById('logoutBtn').addEventListener('click', async () => {
     try { await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' }); } catch {}
-    window.location.href = '/login-dashboard.html';
+    window.location.href = '/login-dashboard';
   });
 
   api('/api/auth/session').then(res => {
-    if (!res.ok) { window.location.href = '/login-dashboard.html'; return; }
+    if (!res.ok) { window.location.href = '/login-dashboard'; return; }
     return res.json().then(s => {
-      if (s.role !== 'admin') { window.location.href = '/login.html'; return; }
+      if (s.role !== 'admin') { window.location.href = '/login'; return; }
       applyLang(lang);
       loadOverview();
     });
