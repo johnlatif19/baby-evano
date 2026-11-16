@@ -73,7 +73,7 @@
         errorEl.textContent = translations[lang]['error.invalid'];
         return;
       }
-      window.location.href = '/index.html';
+      window.location.href = '/index';
     } catch {
       errorEl.textContent = translations[lang]['error.network'];
     } finally {
