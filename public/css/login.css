@@ -134,6 +134,44 @@ input:focus {
   border-color: var(--pink-strong);
 }
 
+.password-wrap {
+  position: relative;
+}
+
+.password-wrap input {
+  padding-inline-end: 44px;
+}
+
+.toggle-password {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 8px;
+  font-size: 15px;
+  line-height: 1;
+  opacity: 0.55;
+  transition: opacity 0.2s ease;
+}
+
+[dir="rtl"] .toggle-password {
+  right: auto;
+  left: 10px;
+}
+
+.toggle-password:hover {
+  opacity: 1;
+}
+
+.eye-icon {
+  display: inline-block;
+  font-size: 14px;
+}
+
 .btn-primary {
   width: 100%;
   padding: 13px;
