@@ -131,7 +131,7 @@ app.post('/api/auth/login', authLimiter, async (req, res) => {
     const token = signToken({ role: credential.role, userId: credential.userId, username });
     res.cookie('evano_token', token, getCookieOptions());
     await writeAudit('login', credential.userId, credential.role, {});
-    res.json({ role: credential.role, redirect: credential.role === 'admin' ? '/dashboard.html' : '/index.html' });
+    res.json({ role: credential.role, redirect: credential.role === 'admin' ? '/dashboard' : '/index' });
   } catch {
     res.status(500).json({ error: 'SERVER_ERROR' });
   }
@@ -279,11 +279,6 @@ app.get('/api/admin/overview', authenticate, requireRole('admin'), async (req, r
   } catch { res.status(500).json({ error: 'SERVER_ERROR' }); }
 });
 
-/* ─── ADMIN RESET ENDPOINT (new feature) ───
-   Soft-reset: marks "taken" medication logs of a specific day as "reset"
-   and writes a reset marker. History is preserved.
-   Body: { medication: 'iron' | 'calcium', date?: 'YYYY-MM-DD' }
-*/
 app.post('/api/admin/medication/reset', authenticate, requireRole('admin'), verifyCsrf, async (req, res) => {
   try {
     const medication = sanitizeString(req.body && req.body.medication, 20);
@@ -333,7 +328,7 @@ app.post('/api/admin/medication/reset', authenticate, requireRole('admin'), veri
   } catch { res.status(500).json({ error: 'SERVER_ERROR' }); }
 });
 
-app.get('/', (req, res) => res.redirect(302, '/login.html'));
+app.get('/', (req, res) => res.redirect(302, '/login'));
 
 app.use(express.static(path.join(__dirname, 'public'), { extensions: ['html'] }));
 
