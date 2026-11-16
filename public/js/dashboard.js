@@ -5,6 +5,13 @@
       'admin.greeting': 'Administrator overview',
       'admin.title': "Evano's day",
       'admin.sub': "Read-only live view of Marina's entries.",
+      'notify.title': 'Send a notification',
+      'notify.titlePh': 'Title',
+      'notify.bodyPh': 'Message',
+      'notify.send': "Send to Evano's devices",
+      'notify.sent': 'Notification sent',
+      'notify.noDevices': 'No devices registered yet',
+      'notify.failed': 'Failed to send',
       'stat.sleep': 'Sleep today',
       'stat.feeds': 'Feeds today',
       'stat.diapers': 'Diapers today',
@@ -37,6 +44,13 @@
       'admin.greeting': 'نظرة المشرف',
       'admin.title': 'يوم إيفانو',
       'admin.sub': 'عرض حي للقراءة فقط لما تدخله مارينا.',
+      'notify.title': 'إرسال إشعار',
+      'notify.titlePh': 'العنوان',
+      'notify.bodyPh': 'الرسالة',
+      'notify.send': 'إرسال إلى أجهزة إيفانو',
+      'notify.sent': 'تم إرسال الإشعار',
+      'notify.noDevices': 'لا توجد أجهزة مسجلة بعد',
+      'notify.failed': 'تعذر الإرسال',
       'stat.sleep': 'نوم اليوم',
       'stat.feeds': 'رضعات اليوم',
       'stat.diapers': 'حفاضات اليوم',
@@ -76,6 +90,11 @@
   const resetCancel = document.getElementById('resetCancel');
   let resetResolver = null;
 
+  const notifyTitle = document.getElementById('notifyTitle');
+  const notifyBody = document.getElementById('notifyBody');
+  const sendNotifyBtn = document.getElementById('sendNotifyBtn');
+  const notifyStatus = document.getElementById('notifyStatus');
+
   function showToast(msg, isError) {
     toastEl.textContent = msg;
     toastEl.classList.toggle('error', !!isError);
@@ -102,6 +121,10 @@
     document.querySelectorAll('[data-i18n]').forEach(el => {
       const key = el.getAttribute('data-i18n');
       if (t[lang][key]) el.textContent = t[lang][key];
+    });
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+      const key = el.getAttribute('data-i18n-placeholder');
+      if (t[lang][key]) el.setAttribute('placeholder', t[lang][key]);
     });
     document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.dataset.lang === lang));
     render();
@@ -209,6 +232,36 @@
       } catch { showToast(t[lang]['toast.error'], true); }
       finally { btn.disabled = false; }
     });
+  });
+
+  sendNotifyBtn.addEventListener('click', async () => {
+    const title = notifyTitle.value.trim();
+    const body = notifyBody.value.trim();
+    if (!title || !body) return;
+    sendNotifyBtn.disabled = true;
+    notifyStatus.textContent = '';
+    try {
+      const res = await api('/api/admin/notify', {
+        method: 'POST',
+        body: JSON.stringify({ title, body })
+      });
+      if (!res.ok) {
+        notifyStatus.textContent = t[lang]['notify.failed'];
+        return;
+      }
+      const result = await res.json();
+      if (result.sent > 0) {
+        notifyStatus.textContent = t[lang]['notify.sent'] + ' (' + result.sent + ')';
+        notifyTitle.value = '';
+        notifyBody.value = '';
+      } else {
+        notifyStatus.textContent = t[lang]['notify.noDevices'];
+      }
+    } catch {
+      notifyStatus.textContent = t[lang]['notify.failed'];
+    } finally {
+      sendNotifyBtn.disabled = false;
+    }
   });
 
   document.getElementById('logoutBtn').addEventListener('click', async () => {
