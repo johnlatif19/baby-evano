@@ -46,6 +46,17 @@
 
   langButtons.forEach(btn => btn.addEventListener('click', () => applyLang(btn.dataset.lang)));
 
+  document.querySelectorAll('.toggle-password').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const target = document.getElementById(btn.dataset.target);
+      if (!target) return;
+      const isPassword = target.getAttribute('type') === 'password';
+      target.setAttribute('type', isPassword ? 'text' : 'password');
+      btn.querySelector('.eye-icon').textContent = isPassword ? '🙈' : '👁';
+      btn.setAttribute('aria-label', isPassword ? 'Hide password' : 'Show password');
+    });
+  });
+
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     errorEl.textContent = '';
