@@ -25,6 +25,18 @@
     <p class="admin-sub" data-i18n="admin.sub">Read-only live view of Marina's entries.</p>
   </section>
 
+  <section class="notify-section">
+    <h2 class="section-title" data-i18n="notify.title">Send a notification</h2>
+    <div class="notify-card">
+      <input type="text" id="notifyTitle" maxlength="120" placeholder="Title" data-i18n-placeholder="notify.titlePh">
+      <textarea id="notifyBody" maxlength="400" rows="2" placeholder="Message" data-i18n-placeholder="notify.bodyPh"></textarea>
+      <div class="notify-actions">
+        <button type="button" id="sendNotifyBtn" class="btn-send" data-i18n="notify.send">Send to Evano's devices</button>
+        <span id="notifyStatus" class="notify-status"></span>
+      </div>
+    </div>
+  </section>
+
   <section class="stats-grid">
     <div class="stat-card">
       <div class="stat-label" data-i18n="stat.sleep">Sleep today</div>
