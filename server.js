@@ -152,6 +152,30 @@ function todayRangeUtc() {
   return { start, end: new Date(start.getTime() + 86400000) };
 }
 
+function serializeValue(value) {
+  if (value && typeof value.toDate === 'function') {
+    return value.toDate().toISOString();
+  }
+  return value;
+}
+
+function serializeDoc(doc) {
+  const data = doc.data() || {};
+  const out = { id: doc.id };
+  Object.keys(data).forEach(k => {
+    out[k] = serializeValue(data[k]);
+  });
+  return out;
+}
+
+function serializeRaw(id, data) {
+  const out = { id };
+  Object.keys(data || {}).forEach(k => {
+    out[k] = serializeValue(data[k]);
+  });
+  return out;
+}
+
 async function listToday(collection) {
   const { start, end } = todayRangeUtc();
   const snap = await db.collection(collection)
@@ -159,22 +183,12 @@ async function listToday(collection) {
     .where('recordedAt', '<', admin.firestore.Timestamp.fromDate(end))
     .orderBy('recordedAt', 'desc')
     .get();
-  return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  return snap.docs.map(d => serializeRaw(d.id, d.data()));
 }
 
 async function listRecent(collection, limit = 50) {
   const snap = await db.collection(collection).orderBy('recordedAt', 'desc').limit(limit).get();
-  return snap.docs.map(d => ({ id: d.id, ...d.data() }));
-}
-
-function serializeDoc(doc) {
-  const data = doc.data() || {};
-  const out = { id: doc.id };
-  Object.keys(data).forEach(k => {
-    const v = data[k];
-    out[k] = v && typeof v.toDate === 'function' ? v.toDate().toISOString() : v;
-  });
-  return out;
+  return snap.docs.map(d => serializeRaw(d.id, d.data()));
 }
 
 app.get('/api/baby/overview', authenticate, requireRole('baby'), async (req, res) => {
