@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Evano Sleepy — Marina</title>
+<link rel="stylesheet" href="/css/index.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand"><span class="brand-dot">☾</span> Evano Sleepy</div>
+  <div class="topbar-actions">
+    <div class="lang-switch">
+      <button type="button" class="lang-btn active" data-lang="en">EN</button>
+      <button type="button" class="lang-btn" data-lang="ar">ع</button>
+    </div>
+    <button type="button" id="logoutBtn" class="ghost-btn" data-i18n="nav.logout">Logout</button>
+  </div>
+</header>
+
+<main class="page">
+  <section class="hero">
+    <p class="hero-greet" data-i18n="hero.greeting">Welcome back,</p>
+    <h1 class="hero-name">Marina</h1>
+    <p class="hero-sub" data-i18n="hero.sub">A quiet space to care for Evano today.</p>
+  </section>
+
+  <section class="baby-card">
+    <div class="baby-avatar">👶</div>
+    <div>
+      <h2>Evano</h2>
+      <p data-i18n="baby.line">Today's gentle rhythm</p>
+    </div>
+    <div class="baby-stats" id="babyStats"></div>
+  </section>
+
+  <section class="overview">
+    <h2 class="section-title" data-i18n="overview.title">Today at a glance</h2>
+    <div class="overview-grid" id="overviewGrid"></div>
+  </section>
+
+  <section class="quick-actions">
+    <h2 class="section-title" data-i18n="quick.title">Quick log</h2>
+    <div class="action-row">
+      <button class="action-btn" data-log="sleep">😴 <span data-i18n="quick.sleep">Sleep</span></button>
+      <button class="action-btn" data-log="feeding">🍼 <span data-i18n="quick.feeding">Feeding</span></button>
+      <button class="action-btn" data-log="diaper">🧷 <span data-i18n="quick.diaper">Diaper</span></button>
+    </div>
+  </section>
+
+  <section class="medication">
+    <h2 class="section-title" data-i18n="med.title">Marina's Medication</h2>
+    <div class="med-grid">
+      <article class="med-card" data-medication="iron">
+        <div class="med-head">
+          <h3 data-i18n="med.iron">Iron</h3>
+          <span class="med-status" data-status="iron">—</span>
+        </div>
+        <p class="med-time" data-time="iron" data-i18n="med.notRecorded">Not recorded</p>
+        <div class="med-actions">
+          <button class="btn-taken" data-action="take" data-med="iron" data-i18n="med.taken">Mark as taken</button>
+          <button class="btn-correct" data-action="correct" data-med="iron" data-i18n="med.correct">Correct</button>
+        </div>
+      </article>
+      <article class="med-card" data-medication="calcium">
+        <div class="med-head">
+          <h3 data-i18n="med.calcium">Calcium</h3>
+          <span class="med-status" data-status="calcium">—</span>
+        </div>
+        <p class="med-time" data-time="calcium" data-i18n="med.notRecorded">Not recorded</p>
+        <div class="med-actions">
+          <button class="btn-taken" data-action="take" data-med="calcium" data-i18n="med.taken">Mark as taken</button>
+          <button class="btn-correct" data-action="correct" data-med="calcium" data-i18n="med.correct">Correct</button>
+        </div>
+      </article>
+    </div>
+    <p class="med-note" data-i18n="med.note">This section records only what Marina enters. It never prescribes or suggests doses.</p>
+  </section>
+</main>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<dialog id="confirmDialog" class="dialog">
+  <p id="confirmText"></p>
+  <div class="dialog-actions">
+    <button type="button" class="ghost-btn" id="confirmCancel" data-i18n="dialog.cancel">Cancel</button>
+    <button type="button" class="btn-taken" id="confirmOk" data-i18n="dialog.confirm">Confirm</button>
+  </div>
+</dialog>
+
+<script src="/js/index.js"></script>
+</body>
+</html>
