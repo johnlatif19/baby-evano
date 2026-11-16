@@ -1,0 +1,172 @@
+:root {
+  --cream: #fbf6ef;
+  --pink: #f7d9de;
+  --pink-strong: #e8a9b4;
+  --sage: #c9d8c5;
+  --lavender: #e3dcf0;
+  --beige: #f0e6d8;
+  --text: #4a3f3a;
+  --muted: #8b7f78;
+  --border: #ece2d4;
+  --shadow: 0 10px 30px rgba(120, 100, 90, 0.08);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  background: var(--cream);
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+[dir="rtl"] body {
+  font-family: 'Segoe UI', 'Tahoma', Arial, sans-serif;
+}
+
+.login-shell {
+  width: 100%;
+  max-width: 400px;
+}
+
+.login-brand {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.brand-mark {
+  font-size: 40px;
+  color: var(--pink-strong);
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.login-brand h1 {
+  margin: 0;
+  font-size: 26px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.login-brand p {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.login-card {
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 28px 24px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+  position: relative;
+}
+
+.login-card h2 {
+  margin: 8px 0 20px;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.lang-switch {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  display: flex;
+  gap: 4px;
+  background: var(--cream);
+  border-radius: 10px;
+  padding: 3px;
+}
+
+[dir="rtl"] .lang-switch {
+  right: auto;
+  left: 16px;
+}
+
+.lang-btn {
+  border: none;
+  background: transparent;
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  cursor: pointer;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.lang-btn.active {
+  background: var(--pink);
+  color: var(--text);
+}
+
+label {
+  display: block;
+  margin-bottom: 14px;
+}
+
+label span {
+  display: block;
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+input {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--cream);
+  font-size: 15px;
+  color: var(--text);
+  transition: border-color 0.2s ease;
+}
+
+input:focus {
+  outline: none;
+  border-color: var(--pink-strong);
+}
+
+.btn-primary {
+  width: 100%;
+  padding: 13px;
+  border-radius: 12px;
+  border: none;
+  background: var(--pink-strong);
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 6px;
+  transition: opacity 0.2s ease;
+}
+
+.btn-primary:hover { opacity: 0.9; }
+.btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.error-msg {
+  color: #b4535a;
+  font-size: 13px;
+  margin-top: 10px;
+  min-height: 16px;
+  text-align: center;
+}
+
+.login-foot {
+  text-align: center;
+  margin: 18px 0 0;
+  font-size: 13px;
+}
+
+.login-foot a {
+  color: var(--muted);
+  text-decoration: none;
+  border-bottom: 1px dashed var(--border);
+}
