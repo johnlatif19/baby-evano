@@ -1,0 +1,70 @@
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  background: linear-gradient(180deg, #f6f1e8 0%, #efe7da 100%);
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+[dir="rtl"] body { font-family: 'Segoe UI', 'Tahoma', Arial, sans-serif; }
+
+.admin-login-shell { width: 100%; max-width: 400px; }
+.admin-brand { text-align: center; margin-bottom: 22px; }
+.admin-mark { font-size: 36px; color: #6f5e88; line-height: 1; margin-bottom: 8px; }
+.admin-brand h1 { margin: 0; font-size: 24px; font-weight: 600; letter-spacing: 0.5px; }
+.admin-brand p { margin: 6px 0 0; color: var(--muted); font-size: 13px; }
+
+.admin-login-card {
+  background: #ffffff;
+  border-radius: 22px;
+  padding: 28px 24px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+  position: relative;
+}
+.admin-login-card h2 { margin: 8px 0 20px; font-size: 17px; font-weight: 600; }
+
+.lang-switch {
+  position: absolute; top: 16px; right: 16px;
+  display: flex; gap: 4px; background: #f3ece0; border-radius: 10px; padding: 3px;
+}
+[dir="rtl"] .lang-switch { right: auto; left: 16px; }
+
+.lang-btn {
+  border: none; background: transparent; padding: 4px 10px;
+  border-radius: 8px; font-size: 12px; cursor: pointer;
+  color: var(--muted); font-weight: 600;
+}
+.lang-btn.active { background: var(--sage); color: var(--ink); }
+
+label { display: block; margin-bottom: 14px; }
+label span { display: block; font-size: 13px; color: var(--muted); margin-bottom: 6px; }
+
+input {
+  width: 100%; padding: 12px 14px; border-radius: 12px;
+  border: 1px solid var(--border); background: #faf6ee;
+  font-size: 15px; color: var(--ink); transition: border-color 0.2s ease;
+}
+input:focus { outline: none; border-color: var(--sage); }
+
+.btn-dark {
+  width: 100%; padding: 13px; border-radius: 12px; border: none;
+  background: #4a3f5c; color: #ffffff; font-size: 15px; font-weight: 600;
+  cursor: pointer; margin-top: 6px; transition: opacity 0.2s ease;
+}
+.btn-dark:hover { opacity: 0.9; }
+.btn-dark:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.error-msg {
+  color: #b4535a; font-size: 13px; margin-top: 10px;
+  min-height: 16px; text-align: center;
+}
+
+.admin-foot { text-align: center; margin: 18px 0 0; font-size: 13px; }
+.admin-foot a { color: var(--muted); text-decoration: none; border-bottom: 1px dashed var(--border); }
