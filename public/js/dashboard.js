@@ -85,7 +85,8 @@
   }
 
   function askReset(med) {
-    resetText.textContent = t[lang]['confirm.reset'].replace('{med}', t[lang]['med.' + med]);
+    const medLabel = t[lang]['med.' + med] || med;
+    resetText.textContent = t[lang]['confirm.reset'].replace('{med}', medLabel);
     resetDialog.showModal();
     return new Promise(resolve => { resetResolver = resolve; });
   }
@@ -189,9 +190,10 @@
     render();
   }
 
-  document.querySelectorAll('.btn-reset').forEach(btn => {
+  document.querySelectorAll('.btn-reset[data-reset]').forEach(btn => {
     btn.addEventListener('click', async () => {
       const med = btn.dataset.reset;
+      if (!med || !['iron', 'calcium'].includes(med)) return;
       const ok = await askReset(med);
       if (!ok) return;
       btn.disabled = true;
