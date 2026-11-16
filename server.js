@@ -198,7 +198,10 @@ app.get('/api/baby/overview', authenticate, requireRole('baby'), async (req, res
       listToday(DIAPER_COLLECTION), listToday(MEDICATION_COLLECTION)
     ]);
     res.json({ sleep, feeding, diaper, medication });
-  } catch { res.status(500).json({ error: 'SERVER_ERROR' }); }
+  } catch (e) {
+    console.error('baby_overview_error', e);
+    res.status(500).json({ error: 'SERVER_ERROR' });
+  }
 });
 
 app.post('/api/sleep', authenticate, requireRole('baby'), verifyCsrf, async (req, res) => {
@@ -212,7 +215,10 @@ app.post('/api/sleep', authenticate, requireRole('baby'), verifyCsrf, async (req
       recordedAt: admin.firestore.FieldValue.serverTimestamp()
     });
     res.json(serializeDoc(await ref.get()));
-  } catch { res.status(500).json({ error: 'SERVER_ERROR' }); }
+  } catch (e) {
+    console.error('sleep_error', e);
+    res.status(500).json({ error: 'SERVER_ERROR' });
+  }
 });
 
 app.post('/api/feeding', authenticate, requireRole('baby'), verifyCsrf, async (req, res) => {
@@ -228,7 +234,10 @@ app.post('/api/feeding', authenticate, requireRole('baby'), verifyCsrf, async (r
       recordedAt: admin.firestore.FieldValue.serverTimestamp()
     });
     res.json(serializeDoc(await ref.get()));
-  } catch { res.status(500).json({ error: 'SERVER_ERROR' }); }
+  } catch (e) {
+    console.error('feeding_error', e);
+    res.status(500).json({ error: 'SERVER_ERROR' });
+  }
 });
 
 app.post('/api/diaper', authenticate, requireRole('baby'), verifyCsrf, async (req, res) => {
@@ -242,7 +251,10 @@ app.post('/api/diaper', authenticate, requireRole('baby'), verifyCsrf, async (re
       recordedAt: admin.firestore.FieldValue.serverTimestamp()
     });
     res.json(serializeDoc(await ref.get()));
-  } catch { res.status(500).json({ error: 'SERVER_ERROR' }); }
+  } catch (e) {
+    console.error('diaper_error', e);
+    res.status(500).json({ error: 'SERVER_ERROR' });
+  }
 });
 
 app.post('/api/medication', authenticate, requireRole('baby'), verifyCsrf, async (req, res) => {
@@ -257,7 +269,10 @@ app.post('/api/medication', authenticate, requireRole('baby'), verifyCsrf, async
     });
     await writeAudit('medication_taken', req.user.userId, 'baby', { medication });
     res.json(serializeDoc(await ref.get()));
-  } catch { res.status(500).json({ error: 'SERVER_ERROR' }); }
+  } catch (e) {
+    console.error('medication_error', e);
+    res.status(500).json({ error: 'SERVER_ERROR' });
+  }
 });
 
 app.post('/api/medication/correct', authenticate, requireRole('baby'), verifyCsrf, async (req, res) => {
@@ -276,7 +291,10 @@ app.post('/api/medication/correct', authenticate, requireRole('baby'), verifyCsr
     });
     await writeAudit('medication_corrected', req.user.userId, 'baby', { medication, correctedLogId: logId });
     res.json(serializeDoc(await ref.get()));
-  } catch { res.status(500).json({ error: 'SERVER_ERROR' }); }
+  } catch (e) {
+    console.error('medication_correct_error', e);
+    res.status(500).json({ error: 'SERVER_ERROR' });
+  }
 });
 
 app.get('/api/admin/overview', authenticate, requireRole('admin'), async (req, res) => {
@@ -290,7 +308,10 @@ app.get('/api/admin/overview', authenticate, requireRole('admin'), async (req, r
       today: { sleep: sleepToday, feeding: feedingToday, diaper: diaperToday, medication: medToday },
       history: { medication: medHistory, sleep: sleepHistory, feeding: feedHistory, diaper: diaperHistory }
     });
-  } catch { res.status(500).json({ error: 'SERVER_ERROR' }); }
+  } catch (e) {
+    console.error('admin_overview_error', e);
+    res.status(500).json({ error: 'SERVER_ERROR' });
+  }
 });
 
 app.post('/api/admin/medication/reset', authenticate, requireRole('admin'), verifyCsrf, async (req, res) => {
@@ -299,6 +320,7 @@ app.post('/api/admin/medication/reset', authenticate, requireRole('admin'), veri
     if (!['iron', 'calcium'].includes(medication)) {
       return res.status(400).json({ error: 'INVALID_MEDICATION' });
     }
+
     const dateStr = req.body && req.body.date;
     let dayStart;
     if (typeof dateStr === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
@@ -309,16 +331,24 @@ app.post('/api/admin/medication/reset', authenticate, requireRole('admin'), veri
       dayStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
     }
     const dayEnd = new Date(dayStart.getTime() + 86400000);
+
     const snap = await db.collection(MEDICATION_COLLECTION)
       .where('medication', '==', medication)
-      .where('status', '==', 'taken')
       .where('recordedAt', '>=', admin.firestore.Timestamp.fromDate(dayStart))
       .where('recordedAt', '<', admin.firestore.Timestamp.fromDate(dayEnd))
       .get();
-    if (snap.empty) return res.status(404).json({ error: 'NO_RECORD_FOR_DAY' });
+
+    const takenDocs = snap.docs.filter(doc => {
+      const data = doc.data();
+      return data && data.status === 'taken';
+    });
+
+    if (!takenDocs.length) {
+      return res.status(404).json({ error: 'NO_RECORD_FOR_DAY' });
+    }
 
     const batch = db.batch();
-    snap.docs.forEach(doc => {
+    takenDocs.forEach(doc => {
       batch.update(doc.ref, {
         status: 'reset',
         resetAt: admin.firestore.FieldValue.serverTimestamp(),
@@ -335,11 +365,16 @@ app.post('/api/admin/medication/reset', authenticate, requireRole('admin'), veri
       resetBy: req.user.userId
     });
     await batch.commit();
+
     await writeAudit('medication_reset', req.user.userId, 'admin', {
-      medication, date: dayStart.toISOString().slice(0, 10), count: snap.size
+      medication, date: dayStart.toISOString().slice(0, 10), count: takenDocs.length
     });
-    res.json({ ok: true, resetCount: snap.size, date: dayStart.toISOString().slice(0, 10) });
-  } catch { res.status(500).json({ error: 'SERVER_ERROR' }); }
+
+    res.json({ ok: true, resetCount: takenDocs.length, date: dayStart.toISOString().slice(0, 10) });
+  } catch (e) {
+    console.error('admin_medication_reset_error', e);
+    res.status(500).json({ error: 'SERVER_ERROR', message: e && e.message ? e.message : 'unknown' });
+  }
 });
 
 app.get('/', (req, res) => res.redirect(302, '/login'));
