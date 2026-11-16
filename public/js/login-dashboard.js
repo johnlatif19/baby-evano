@@ -51,7 +51,10 @@
     errorEl.textContent = '';
     const username = usernameInput.value.trim();
     const password = passwordInput.value;
-    if (!username || !password) { errorEl.textContent = translations[lang]['error.invalid']; return; }
+    if (!username || !password) {
+      errorEl.textContent = translations[lang]['error.invalid'];
+      return;
+    }
     submitBtn.disabled = true;
     try {
       const res = await fetch('/api/auth/login', {
@@ -60,14 +63,17 @@
         credentials: 'include',
         body: JSON.stringify({ username, password })
       });
-      if (!res.ok) { errorEl.textContent = translations[lang]['error.invalid']; return; }
+      if (!res.ok) {
+        errorEl.textContent = translations[lang]['error.invalid'];
+        return;
+      }
       const data = await res.json();
       if (data.role !== 'admin') {
         await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
         errorEl.textContent = translations[lang]['error.invalid'];
         return;
       }
-      window.location.href = '/dashboard.html';
+      window.location.href = '/dashboard';
     } catch {
       errorEl.textContent = translations[lang]['error.network'];
     } finally {
