@@ -10,6 +10,8 @@ const admin = require('firebase-admin');
 const app = express();
 const isProduction = process.env.NODE_ENV === 'production';
 
+app.set('trust proxy', 1);
+
 if (!admin.apps.length) {
   const firebaseConfig = JSON.parse(process.env.FIREBASE_CONFIG || '{}');
   admin.initializeApp({
@@ -23,6 +25,7 @@ const FEEDING_COLLECTION = 'feedingLogs';
 const DIAPER_COLLECTION = 'diaperLogs';
 const MEDICATION_COLLECTION = 'medicationLogs';
 const AUDIT_COLLECTION = 'auditLogs';
+const DEVICE_TOKENS_COLLECTION = 'deviceTokens';
 
 app.use(express.json({ limit: '1mb' }));
 app.use(cookieParser());
@@ -119,6 +122,53 @@ async function writeAudit(action, actorId, actorRole, details) {
   }
 }
 
+async function sendPushToRole(role, title, body, data) {
+  try {
+    const snap = await db.collection(DEVICE_TOKENS_COLLECTION)
+      .where('role', '==', role)
+      .get();
+    if (snap.empty) return { sent: 0, failed: 0 };
+    const tokens = snap.docs
+      .map(d => d.data().token)
+      .filter(t => typeof t === 'string' && t.length > 10);
+    if (!tokens.length) return { sent: 0, failed: 0 };
+
+    const message = {
+      notification: { title, body },
+      data: data || {},
+      tokens: tokens
+    };
+    const response = await admin.messaging().sendEachForMulticast(message);
+
+    const invalidTokens = [];
+    response.responses.forEach((r, idx) => {
+      if (!r.success) {
+        const errCode = r.error && r.error.code;
+        if (
+          errCode === 'messaging/invalid-registration-token' ||
+          errCode === 'messaging/registration-token-not-registered'
+        ) {
+          invalidTokens.push(tokens[idx]);
+        }
+      }
+    });
+
+    if (invalidTokens.length) {
+      const batch = db.batch();
+      const invalidSnap = await db.collection(DEVICE_TOKENS_COLLECTION)
+        .where('token', 'in', invalidTokens)
+        .get();
+      invalidSnap.docs.forEach(doc => batch.delete(doc.ref));
+      await batch.commit();
+    }
+
+    return { sent: response.successCount, failed: response.failureCount };
+  } catch (e) {
+    console.error('send_push_error', e);
+    return { sent: 0, failed: 0, error: e.message };
+  }
+}
+
 app.post('/api/auth/login', authLimiter, async (req, res) => {
   try {
     const username = sanitizeString(req.body && req.body.username, 120);
@@ -146,6 +196,37 @@ app.get('/api/auth/session', authenticate, (req, res) => {
   res.json({ role: req.user.role, userId: req.user.userId, username: req.user.username });
 });
 
+app.post('/api/devices/register', authenticate, verifyCsrf, async (req, res) => {
+  try {
+    const token = sanitizeString(req.body && req.body.token, 500);
+    if (!token) return res.status(400).json({ error: 'INVALID_TOKEN' });
+    const existing = await db.collection(DEVICE_TOKENS_COLLECTION)
+      .where('token', '==', token)
+      .limit(1)
+      .get();
+    if (existing.empty) {
+      await db.collection(DEVICE_TOKENS_COLLECTION).add({
+        token,
+        role: req.user.role,
+        userId: req.user.userId,
+        platform: sanitizeString(req.body.platform, 20) || 'unknown',
+        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+        updatedAt: admin.firestore.FieldValue.serverTimestamp()
+      });
+    } else {
+      await existing.docs[0].ref.update({
+        role: req.user.role,
+        userId: req.user.userId,
+        updatedAt: admin.firestore.FieldValue.serverTimestamp()
+      });
+    }
+    res.json({ ok: true });
+  } catch (e) {
+    console.error('device_register_error', e);
+    res.status(500).json({ error: 'SERVER_ERROR' });
+  }
+});
+
 function todayRangeUtc() {
   const now = new Date();
   const start = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
@@ -162,17 +243,13 @@ function serializeValue(value) {
 function serializeDoc(doc) {
   const data = doc.data() || {};
   const out = { id: doc.id };
-  Object.keys(data).forEach(k => {
-    out[k] = serializeValue(data[k]);
-  });
+  Object.keys(data).forEach(k => { out[k] = serializeValue(data[k]); });
   return out;
 }
 
 function serializeRaw(id, data) {
   const out = { id };
-  Object.keys(data || {}).forEach(k => {
-    out[k] = serializeValue(data[k]);
-  });
+  Object.keys(data || {}).forEach(k => { out[k] = serializeValue(data[k]); });
   return out;
 }
 
@@ -214,6 +291,9 @@ app.post('/api/sleep', authenticate, requireRole('baby'), verifyCsrf, async (req
       userId: req.user.userId, minutes,
       recordedAt: admin.firestore.FieldValue.serverTimestamp()
     });
+    await sendPushToRole('admin', 'Evano — Sleep logged', `Marina logged ${minutes} min of sleep`, {
+      type: 'sleep', minutes: String(minutes)
+    });
     res.json(serializeDoc(await ref.get()));
   } catch (e) {
     console.error('sleep_error', e);
@@ -233,6 +313,10 @@ app.post('/api/feeding', authenticate, requireRole('baby'), verifyCsrf, async (r
       amountMl: Number.isFinite(amountMl) ? amountMl : 0,
       recordedAt: admin.firestore.FieldValue.serverTimestamp()
     });
+    const body = amountMl > 0 ? `Marina logged a ${amountMl} ml feed` : `Marina logged a nursing feed`;
+    await sendPushToRole('admin', 'Evano — Feeding logged', body, {
+      type: 'feeding', amountMl: String(amountMl || 0)
+    });
     res.json(serializeDoc(await ref.get()));
   } catch (e) {
     console.error('feeding_error', e);
@@ -249,6 +333,9 @@ app.post('/api/diaper', authenticate, requireRole('baby'), verifyCsrf, async (re
     const ref = await db.collection(DIAPER_COLLECTION).add({
       userId: req.user.userId, kind,
       recordedAt: admin.firestore.FieldValue.serverTimestamp()
+    });
+    await sendPushToRole('admin', 'Evano — Diaper change', `Marina logged a ${kind} diaper`, {
+      type: 'diaper', kind
     });
     res.json(serializeDoc(await ref.get()));
   } catch (e) {
@@ -268,6 +355,9 @@ app.post('/api/medication', authenticate, requireRole('baby'), verifyCsrf, async
       recordedAt: admin.firestore.FieldValue.serverTimestamp()
     });
     await writeAudit('medication_taken', req.user.userId, 'baby', { medication });
+    await sendPushToRole('admin', 'Evano — Medication taken', `Marina logged ${medication} as taken`, {
+      type: 'medication', medication
+    });
     res.json(serializeDoc(await ref.get()));
   } catch (e) {
     console.error('medication_error', e);
@@ -320,7 +410,6 @@ app.post('/api/admin/medication/reset', authenticate, requireRole('admin'), veri
     if (!['iron', 'calcium'].includes(medication)) {
       return res.status(400).json({ error: 'INVALID_MEDICATION' });
     }
-
     const dateStr = req.body && req.body.date;
     let dayStart;
     if (typeof dateStr === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
@@ -333,14 +422,13 @@ app.post('/api/admin/medication/reset', authenticate, requireRole('admin'), veri
     const dayEnd = new Date(dayStart.getTime() + 86400000);
 
     const snap = await db.collection(MEDICATION_COLLECTION)
-      .where('medication', '==', medication)
       .where('recordedAt', '>=', admin.firestore.Timestamp.fromDate(dayStart))
       .where('recordedAt', '<', admin.firestore.Timestamp.fromDate(dayEnd))
       .get();
 
     const takenDocs = snap.docs.filter(doc => {
-      const data = doc.data();
-      return data && data.status === 'taken';
+      const d = doc.data();
+      return d && d.status === 'taken' && d.medication === medication;
     });
 
     if (!takenDocs.length) {
@@ -374,6 +462,22 @@ app.post('/api/admin/medication/reset', authenticate, requireRole('admin'), veri
   } catch (e) {
     console.error('admin_medication_reset_error', e);
     res.status(500).json({ error: 'SERVER_ERROR', message: e && e.message ? e.message : 'unknown' });
+  }
+});
+
+app.post('/api/admin/notify', authenticate, requireRole('admin'), verifyCsrf, async (req, res) => {
+  try {
+    const title = sanitizeString(req.body && req.body.title, 120);
+    const body = sanitizeString(req.body && req.body.body, 400);
+    if (!title || !body) {
+      return res.status(400).json({ error: 'MISSING_FIELDS' });
+    }
+    const result = await sendPushToRole('baby', title, body, { type: 'manual' });
+    await writeAudit('admin_notify', req.user.userId, 'admin', { title, body, result });
+    res.json({ ok: true, ...result });
+  } catch (e) {
+    console.error('admin_notify_error', e);
+    res.status(500).json({ error: 'SERVER_ERROR' });
   }
 });
 
