@@ -123,8 +123,8 @@
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' }
     }, options || {}));
-    if (res.status === 401) { window.location.href = '/login.html'; throw new Error('auth'); }
-    if (res.status === 403) { window.location.href = '/login.html'; throw new Error('role'); }
+    if (res.status === 401) { window.location.href = '/login'; throw new Error('auth'); }
+    if (res.status === 403) { window.location.href = '/login'; throw new Error('role'); }
     return res;
   }
 
@@ -281,13 +281,13 @@
 
   document.getElementById('logoutBtn').addEventListener('click', async () => {
     try { await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' }); } catch {}
-    window.location.href = '/login.html';
+    window.location.href = '/login';
   });
 
   api('/api/auth/session').then(res => {
-    if (!res.ok) { window.location.href = '/login.html'; return; }
+    if (!res.ok) { window.location.href = '/login'; return; }
     return res.json().then(data => {
-      if (data.role !== 'baby') { window.location.href = '/login-dashboard.html'; return; }
+      if (data.role !== 'baby') { window.location.href = '/login-dashboard'; return; }
       applyLang(lang);
       loadOverview();
     });
